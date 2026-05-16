@@ -5,7 +5,12 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="mb-0">📚 Books in the Library</h1>
-    <span class="badge bg-primary fs-6">{{ books|length }} total</span>
+    <div>
+        <span class="badge bg-primary fs-6 me-2">{{ books|length }} total</span>
+        <a href="{{ url_for('main.book_new') }}" class="btn btn-success">
+            + Add Book
+        </a>
+    </div>
 </div>
 
 <p class="text-muted">
@@ -24,6 +29,7 @@
                 <th>Genre</th>
                 <th>Published</th>
                 <th class="text-center">Status</th>
+                <th class="text-center" style="width: 170px;">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -46,6 +52,16 @@
                     {% else %}
                         <span class="badge bg-warning text-dark">On Loan</span>
                     {% endif %}
+                </td>
+                <td class="text-center">
+                    <a href="{{ url_for('main.book_edit', book_id=book.BookID) }}"
+                       class="btn btn-sm btn-outline-primary">Edit</a>
+                    <form method="post"
+                          action="{{ url_for('main.book_delete', book_id=book.BookID) }}"
+                          style="display:inline"
+                          onsubmit="return confirm('Delete this book? This cannot be undone.');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
                 </td>
             </tr>
             {% endfor %}

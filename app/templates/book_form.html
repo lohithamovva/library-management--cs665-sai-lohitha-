@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if book %}Edit Book{% else %}Add Book{% endif %} — Library Management
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 col-lg-6 mx-auto">
+        <h1 class="mb-4">
+            {% if book %}
+                ✏️ Edit Book
+            {% else %}
+                ➕ Add a New Book
+            {% endif %}
+        </h1>
+
+        <form method="post" novalidate>
+
+            <div class="mb-3">
+                <label for="title" class="form-label">
+                    Title <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="title" name="title"
+                       value="{{ form_data.get('title', book.Title if book else '') }}"
+                       required maxlength="200">
+                <div class="form-text">The book's title. Required.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="author_id" class="form-label">
+                    Author <span class="text-danger">*</span>
+                </label>
+                <select class="form-select" id="author_id" name="author_id" required>
+                    <option value="">-- Select an author --</option>
+                    {% for author in authors %}
+                        <option value="{{ author.AuthorID }}"
+                            {% if form_data.get('author_id')|string == author.AuthorID|string
+                                  or (book and book.AuthorID == author.AuthorID and not form_data.get('author_id')) %}
+                                selected
+                            {% endif %}>
+                            {{ author.AuthorName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="genre_id" class="form-label">Genre</label>
+                <select class="form-select" id="genre_id" name="genre_id">
+                    <option value="">-- No genre --</option>
+                    {% for genre in genres %}
+                        <option value="{{ genre.GenreID }}"
+                            {% if form_data.get('genre_id')|string == genre.GenreID|string
+                                  or (book and book.GenreID == genre.GenreID and not form_data.get('genre_id')) %}
+                                selected
+                            {% endif %}>
+                            {{ genre.GenreName }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">Optional.</div>
+            </div>
+
+            <div class="mb-4">
+                <label for="published_year" class="form-label">Published Year</label>
+                <input type="number" class="form-control" id="published_year"
+                       name="published_year" min="1" max="2100"
+                       value="{{ form_data.get('published_year', book.PublishedYear if book else '') }}">
+                <div class="form-text">Optional. Must be a positive whole number.</div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    {% if book %}Save Changes{% else %}Add Book{% endif %}
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

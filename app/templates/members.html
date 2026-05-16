@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Members — Library Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">👥 Library Members</h1>
+    <div>
+        <span class="badge bg-primary fs-6 me-2">{{ members|length }} total</span>
+        <a href="{{ url_for('main.member_new') }}" class="btn btn-success">
+            + Add Member
+        </a>
+    </div>
+</div>
+
+<p class="text-muted">
+    All registered library members. Click a member's name to see their full loan history.
+</p>
+
+{% if members %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Join Date</th>
+                <th class="text-center">Active Loans</th>
+                <th class="text-center" style="width: 240px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for member in members %}
+            <tr>
+                <td class="text-muted">{{ member.MemberID }}</td>
+                <td>
+                    <a href="{{ url_for('main.member_detail', member_id=member.MemberID) }}"
+                       class="text-decoration-none">
+                        <strong>{{ member.full_name }}</strong>
+                    </a>
+                </td>
+                <td>{{ member.Email }}</td>
+                <td>{{ member.JoinDate.strftime('%b %d, %Y') }}</td>
+                <td class="text-center">
+                    {% set active_count = member.loans
+                        | selectattr('ReturnDate', 'none')
+                        | list | length %}
+                    {% if active_count > 0 %}
+                        <span class="badge bg-warning text-dark">{{ active_count }}</span>
+                    {% else %}
+                        <span class="text-muted">0</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <a href="{{ url_for('main.member_detail', member_id=member.MemberID) }}"
+                       class="btn btn-sm btn-outline-info">View</a>
+                    <a href="{{ url_for('main.member_edit', member_id=member.MemberID) }}"
+                       class="btn btn-sm btn-outline-primary">Edit</a>
+                    <form method="post"
+                          action="{{ url_for('main.member_delete', member_id=member.MemberID) }}"
+                          style="display:inline"
+                          onsubmit="return confirm('Delete this member? Their loan history will also be deleted.');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    No members yet. Click "+ Add Member" to register the first one.
+</div>
+{% endif %}
+{% endblock %}

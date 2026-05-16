@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — Library Management{% endblock %}
+
+{% block content %}
+<h1 class="mb-2">📊 Library Dashboard</h1>
+<p class="text-muted mb-4">
+  Summary statistics computed in SQL using
+  <code>COUNT</code>, <code>SUM</code>, and <code>AVG</code> aggregate functions.
+</p>
+
+<!-- Big number cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-6">
+    <div class="card text-center border-primary h-100">
+      <div class="card-body">
+        <h2 class="display-5 text-primary mb-0">{{ total_books }}</h2>
+        <p class="card-text text-muted mb-0">Books in catalog</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="card text-center border-info h-100">
+      <div class="card-body">
+        <h2 class="display-5 text-info mb-0">{{ total_members }}</h2>
+        <p class="card-text text-muted mb-0">Registered members</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="card text-center border-success h-100">
+      <div class="card-body">
+        <h2 class="display-5 text-success mb-0">{{ total_loans }}</h2>
+        <p class="card-text text-muted mb-0">Loans ever issued</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="card text-center border-warning h-100">
+      <div class="card-body">
+        <h2 class="display-5 text-warning mb-0">{{ active_loans }}</h2>
+        <p class="card-text text-muted mb-0">Currently on loan</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AVG and SUM cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">📅 Average Loan Duration</h5>
+        <p class="text-muted mb-2">
+          Across all <strong>{{ returned_loans }}</strong> returned loans:
+        </p>
+        <h3 class="text-primary mb-2">{{ avg_loan_days }} days</h3>
+        <small class="text-muted">
+          SQL: <code>AVG(ReturnDate − LoanDate)</code>
+        </small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">📚 Total Reading Days</h5>
+        <p class="text-muted mb-2">
+          Combined days of all returned loans:
+        </p>
+        <h3 class="text-success mb-2">{{ total_reading_days }} days</h3>
+        <small class="text-muted">
+          SQL: <code>SUM(ReturnDate − LoanDate)</code>
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Catalog overview -->
+<div class="card mb-4">
+  <div class="card-body">
+    <h5 class="card-title">📖 Catalog at a Glance</h5>
+    <p class="card-text mb-0">
+      The library holds <strong>{{ total_books }}</strong> books from
+      <strong>{{ total_authors }}</strong> distinct authors across
+      <strong>{{ total_genres }}</strong> genres.
+    </p>
+  </div>
+</div>
+
+<!-- Top borrowed books and most active members -->
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header bg-primary text-white">
+        🏆 Top 5 Most Borrowed Books
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for b in top_books %}
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div>
+              <strong>{{ b.Title }}</strong><br>
+              <small class="text-muted">by {{ b.AuthorName }}</small>
+            </div>
+            <span class="badge bg-primary rounded-pill align-self-center">
+              {{ b.loan_count }} loan{{ 's' if b.loan_count != 1 else '' }}
+            </span>
+          </li>
+        {% else %}
+          <li class="list-group-item text-muted">No loans recorded yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header bg-info text-white">
+        👥 Top 5 Most Active Members
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for m in top_members %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="/members/{{ m.MemberID }}" class="text-decoration-none">
+              {{ m.FirstName }} {{ m.LastName }}
+            </a>
+            <span class="badge bg-info rounded-pill">
+              {{ m.loan_count }} loan{{ 's' if m.loan_count != 1 else '' }}
+            </span>
+          </li>
+        {% else %}
+          <li class="list-group-item text-muted">No loans recorded yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Books per genre -->
+<div class="card mb-4">
+  <div class="card-header bg-secondary text-white">
+    🏷️ Books per Genre <small class="text-light opacity-75">(COUNT … GROUP BY)</small>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-striped mb-0">
+        <thead>
+          <tr>
+            <th>Genre</th>
+            <th class="text-end" style="width: 160px;">Number of Books</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for g in genre_stats %}
+            <tr>
+              <td>{{ g.GenreName }}</td>
+              <td class="text-end">
+                <span class="badge bg-secondary rounded-pill">{{ g.book_count }}</span>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="2" class="text-muted">No genres yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

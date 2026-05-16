@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Loans — Library Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">📖 Loans</h1>
+    <div>
+        <span class="badge bg-primary fs-6 me-2">{{ loans|length }} total</span>
+        <a href="{{ url_for('main.loan_new') }}" class="btn btn-success">
+            + Issue Loan
+        </a>
+    </div>
+</div>
+
+<p class="text-muted">
+    Complete loan history, most recent first. Active loans show a yellow badge.
+    Click <strong>Return</strong> to mark a loan as returned.
+</p>
+
+{% if loans %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Book</th>
+                <th>Member</th>
+                <th>Loan Date</th>
+                <th>Return Date</th>
+                <th class="text-center">Days</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for loan in loans %}
+            <tr>
+                <td class="text-muted">{{ loan.LoanID }}</td>
+                <td>
+                    <strong>{{ loan.book.Title }}</strong>
+                    <br>
+                    <small class="text-muted">by {{ loan.book.author.AuthorName }}</small>
+                </td>
+                <td>
+                    <a href="{{ url_for('main.member_detail', member_id=loan.member.MemberID) }}"
+                       class="text-decoration-none">
+                        {{ loan.member.full_name }}
+                    </a>
+                </td>
+                <td>{{ loan.LoanDate.strftime('%b %d, %Y') }}</td>
+                <td>
+                    {% if loan.ReturnDate %}
+                        {{ loan.ReturnDate.strftime('%b %d, %Y') }}
+                    {% else %}
+                        <span class="text-muted fst-italic">— not returned —</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">{{ loan.days_kept }}</td>
+                <td class="text-center">
+                    {% if loan.status == "ON LOAN" %}
+                        <span class="badge bg-warning text-dark">On Loan</span>
+                    {% elif loan.status == "LATE RETURNED" %}
+                        <span class="badge bg-danger">Late Return</span>
+                    {% else %}
+                        <span class="badge bg-success">Returned on Time</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    {% if not loan.is_returned %}
+                        <form method="post"
+                              action="{{ url_for('main.loan_return', loan_id=loan.LoanID) }}"
+                              style="display:inline"
+                              onsubmit="return confirm('Mark this loan as returned today?');">
+                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                Return
+                            </button>
+                        </form>
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    No loans recorded yet. Click <strong>"+ Issue Loan"</strong> to create one.
+</div>
+{% endif %}
+{% endblock %}

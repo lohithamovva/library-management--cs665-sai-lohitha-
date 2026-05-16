@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Issue a Loan — Library Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 col-lg-7 mx-auto">
+        <h1 class="mb-4">📚 Issue a New Loan</h1>
+
+        <div class="alert alert-info">
+            <strong>How this works:</strong> Issuing a loan runs as a single SQL
+            transaction. The app verifies the book is available and that the
+            member is below the 3-book limit. If any check fails,
+            <em>no loan is created</em> and the database stays unchanged.
+        </div>
+
+        <form method="post" novalidate>
+
+            <div class="mb-3">
+                <label for="member_id" class="form-label">
+                    Member <span class="text-danger">*</span>
+                </label>
+                <select class="form-select" id="member_id" name="member_id" required>
+                    <option value="">-- Select a member --</option>
+                    {% for m in members %}
+                        {% set active = m.loans
+                            | selectattr('ReturnDate', 'none')
+                            | list | length %}
+                        <option value="{{ m.MemberID }}"
+                            {% if form_data.get('member_id')|string == m.MemberID|string %}selected{% endif %}>
+                            {{ m.full_name }} ({{ m.Email }}) — {{ active }} active loan{{ 's' if active != 1 else '' }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">
+                    Each member can hold up to 3 books at a time.
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="book_id" class="form-label">
+                    Book <span class="text-danger">*</span>
+                </label>
+                <select class="form-select" id="book_id" name="book_id" required>
+                    <option value="">-- Select a book --</option>
+                    {% for b in books %}
+                        <option value="{{ b.BookID }}"
+                            {% if not b.is_available %}disabled{% endif %}
+                            {% if form_data.get('book_id')|string == b.BookID|string %}selected{% endif %}>
+                            {{ b.Title }} — {{ b.author.AuthorName }}
+                            {% if not b.is_available %} (UNAVAILABLE){% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">
+                    Books that are already on loan are disabled.
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('main.loans_list') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Issue Loan</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}
