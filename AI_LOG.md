@@ -1,7 +1,5 @@
 # AI Assistance Log
 
-This file documents all instances where Generative AI was used during the development of Project 3, as required by the course's AI Disclosure Policy.
-
 ---
 
 ## Entry 1 — Initial Project Setup
@@ -21,6 +19,13 @@ This file documents all instances where Generative AI was used during the develo
 - **Prompt:** "Walk me through normalizing my Library DB to 3NF and create the deliverables."
 - **AI Output:** Claude identified update anomalies (Author/Genre duplication), insertion anomalies (cannot record an author without a book), deletion anomalies (deleting the last book by an author loses the author), and a transitive dependency (the Status column in Loans is calculated from ReturnDate and LoanDate). It proposed a 5-table 3NF schema (Authors, Genres, Books, Members, Loans) and generated the NORMALIZATION.md report and schema.sql file.
 - **My Modification:** I reviewed the report for accuracy, added my name as the author of the report, and verified that the proposed schema preserves the original data semantics from Project 1.
+
+
+## Entry 4 — Building the Data Layer and Books Listing Page (Stage 1)
+- **Tool:** Claude (Anthropic)
+- **Prompt:** "Ready for Part 2 — start building the Flask app on top of my 3NF schema."
+- **AI Output:** Claude wrote replacement code for app/models.py (5 SQLAlchemy models for Authors, Genres, Books, Members, Loans with proper relationships and a computed `status` property that replaces the 3NF-violating Status column), app/__init__.py (Flask factory with a one-time seed function), app/routes.py (Blueprint with an index route), and updated base.html and index.html templates to display all 10 books with author/genre/status badges.
+- **My Modification:** Replaced each file's contents in VSCode, deleted instance/app.db so a fresh database would be generated, restarted Flask, and verified the Books page renders correctly at http://127.0.0.1:5000 with proper relationships and computed availability.
 
 ---
 
