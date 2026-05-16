@@ -1,25 +1,61 @@
 {% extends "base.html" %}
 
-{% block title %}Home | Stack Outline App{% endblock %}
+{% block title %}Books — Library Management{% endblock %}
 
 {% block content %}
-<section class="mb-4">
-  <h1 class="h3">Flask + SQLAlchemy + Jinja2 Starter</h1>
-  <p class="text-muted mb-0">
-    This page demonstrates a minimal HTML5/CSS3 frontend with Bootstrap and server-side rendering.
-  </p>
-</section>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">📚 Books in the Library</h1>
+    <span class="badge bg-primary fs-6">{{ books|length }} total</span>
+</div>
 
-<section>
-  <h2 class="h5">Example Records</h2>
-  {% if records %}
-    <ul class="list-group">
-      {% for record in records %}
-        <li class="list-group-item">{{ record.title }}</li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <div class="alert alert-info mb-0">No records yet. Add some through the Flask shell or extend routes with a form/API.</div>
-  {% endif %}
-</section>
+<p class="text-muted">
+    The complete catalog of books, including each book's author, genre,
+    publication year, and current availability.
+</p>
+
+{% if books %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Genre</th>
+                <th>Published</th>
+                <th class="text-center">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for book in books %}
+            <tr>
+                <td class="text-muted">{{ book.BookID }}</td>
+                <td><strong>{{ book.Title }}</strong></td>
+                <td>{{ book.author.AuthorName }}</td>
+                <td>
+                    {% if book.genre %}
+                        <span class="badge bg-secondary">{{ book.genre.GenreName }}</span>
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>{{ book.PublishedYear or "—" }}</td>
+                <td class="text-center">
+                    {% if book.is_available %}
+                        <span class="badge bg-success">Available</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">On Loan</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    No books in the library yet. The seed data may not have loaded —
+    try deleting <code>instance/app.db</code> and restarting the server.
+</div>
+{% endif %}
 {% endblock %}
