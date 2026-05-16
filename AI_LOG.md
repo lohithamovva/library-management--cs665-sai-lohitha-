@@ -29,5 +29,18 @@
 
 ---
 
+
+## Entry 7 — Stage 3: Loans CRUD with Transaction Logic
+- **Tool:** Claude (Anthropic)
+- **Prompt:** "Stage 3B — Loans CRUD and the transaction."
+- **AI Output:** Claude added Loans routes to app/routes.py: loans_list, loan_new (transactional), and loan_return. The loan_new view wraps multiple steps in a try/except/db.session.rollback() block: verify book exists, verify book is available, verify member exists, verify member is below the 3-active-loan limit, then insert the Loan row and commit atomically. Any failure rolls back the entire transaction. Created loans.html (table with status badges + Return button) and loan_form.html (Issue Loan form with disabled-option styling for unavailable books).
+- **My Modification:** I replaced/created each file, tested issuing a loan to an available book (success), tested issuing a loan to an already-borrowed book (rejected by disabled UI), tested marking a loan as returned (status changes correctly), and verified the transaction rolls back cleanly on failure.
+
+## Entry 8 — Stage 4: Dashboard with SQL Aggregates
+- **Tool:** Claude (Anthropic)
+- **Prompt:** "Stage 4 — build a dashboard with COUNT, SUM, AVG aggregates."
+- **AI Output:** Claude added a /dashboard route to app/routes.py using sqlalchemy.func.count, func.avg, and func.sum: COUNT totals for books/authors/genres/members/loans/active loans; AVG loan duration via func.avg(julianday(ReturnDate) - julianday(LoanDate)); SUM total reading days; COUNT + GROUP BY + ORDER BY + LIMIT for top 5 most-borrowed books and top 5 most-active members; COUNT + GROUP BY for books-per-genre breakdown. Created dashboard.html with Bootstrap cards displaying each metric, and updated base.html to enable the Dashboard nav link.
+- **My Modification:** I pasted both files into VSCode, verified the dashboard renders all stat cards with sensible values from the seeded data, and confirmed the Top Books / Top Members / Genre breakdown tables populate from the actual loan history.
+
 ## Notes
 - Additional entries will be added as the project progresses through CRUD route implementation, dashboard development, validation logic, and final documentation.
